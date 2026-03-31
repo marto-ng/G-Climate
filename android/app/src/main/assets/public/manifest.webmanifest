@@ -1,0 +1,21 @@
+{
+  "name": "G-Climate",
+  "short_name": "G-Climate",
+  "description": "Tu app de clima inteligente con IA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#0a0f1e",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/weather/192/192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://picsum.photos/seed/weather/512/512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

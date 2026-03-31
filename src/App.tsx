@@ -147,9 +147,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-white font-sans selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#0a0f1e] text-white font-sans selection:bg-blue-500/30 pb-32">
       {/* Header */}
-      <header className="p-6 flex items-center justify-between sticky top-0 bg-[#0a0f1e]/80 backdrop-blur-md z-50">
+      <header className="p-6 pt-[calc(1.5rem+var(--safe-area-top))] flex items-center justify-between sticky top-0 bg-[#0a0f1e]/80 backdrop-blur-md z-50">
         <div className="flex items-center gap-2">
           <MapPin className="w-5 h-5 text-blue-400" />
           <div className="flex flex-col">
@@ -425,7 +425,7 @@ export default function App() {
       </main>
 
       {/* Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 p-4 bg-[#0a0f1e]/80 backdrop-blur-xl border-t border-white/5 z-50">
+      <nav className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+var(--safe-area-bottom))] bg-[#0a0f1e]/80 backdrop-blur-xl border-t border-white/5 z-50">
         <div className="max-w-md mx-auto flex items-center justify-around">
           <NavButton 
             active={activeTab === 'inicio'} 
