@@ -1,0 +1,5 @@
+{
+  "name": "G-Climate",
+  "description": "Una aplicación de clima moderna con datos en tiempo real impulsada por Google Search.",
+  "requestFramePermissions": ["geolocation"]
+}
