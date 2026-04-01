@@ -14,6 +14,7 @@ import {
   ChevronRight, 
   Plus,
   X,
+  Moon,
   Loader2,
   Calendar,
   Home,
@@ -33,11 +34,14 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [searchQuery, setSearchQuery] = useState('');
-  const [savedLocations, setSavedLocations] = useState([
-    { name: 'San Francisco', temp: 20, condition: 'Soleado' },
-    { name: 'New York', temp: 11, condition: 'Nublado' },
-    { name: 'London', temp: 9, condition: 'Lluvia Ligera' },
-  ]);
+  const [savedLocations, setSavedLocations] = useState(() => {
+    const saved = localStorage.getItem('g-climate-locations');
+    return saved ? JSON.parse(saved) : [
+      { name: 'San Francisco', temp: 20, condition: 'Soleado' },
+      { name: 'New York', temp: 11, condition: 'Nublado' },
+      { name: 'London', temp: 9, condition: 'Lluvia Ligera' },
+    ];
+  });
 
   const fetchWeather = useCallback(async (loc: string) => {
     setLoading(true);
@@ -87,6 +91,10 @@ export default function App() {
     return () => clearInterval(intervalId);
   }, [location, fetchWeather]);
 
+  useEffect(() => {
+    localStorage.setItem('g-climate-locations', JSON.stringify(savedLocations));
+  }, [savedLocations]);
+
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -130,12 +138,39 @@ export default function App() {
     setSavedLocations(prev => prev.filter((_, i) => i !== index));
   };
 
-  const getWeatherIcon = (condition: string) => {
+  const isDaytime = (timeStr?: string, sunrise?: string, sunset?: string) => {
+    if (!sunrise || !sunset) return true;
+    
+    const parseTime = (t: string) => {
+      const parts = t.split(' ');
+      const time = parts[0];
+      const period = parts[1];
+      let [hours, minutes] = time.split(':').map(Number);
+      if (period?.toLowerCase() === 'pm' && hours < 12) hours += 12;
+      if (period?.toLowerCase() === 'am' && hours === 12) hours = 0;
+      const d = new Date();
+      d.setHours(hours, minutes, 0, 0);
+      return d;
+    };
+
+    try {
+      const now = (timeStr && timeStr !== 'Ahora') ? parseTime(timeStr) : new Date();
+      const rise = parseTime(sunrise);
+      const set = parseTime(sunset);
+      return now >= rise && now <= set;
+    } catch (e) {
+      return true;
+    }
+  };
+
+  const getWeatherIcon = (condition: string, isDay: boolean = true) => {
     const c = condition.toLowerCase();
-    if (c.includes('sol') || c.includes('despejado')) return <Sun className="w-6 h-6 text-yellow-400" />;
+    if (c.includes('sol') || c.includes('despejado')) {
+      return isDay ? <Sun className="w-6 h-6 text-yellow-400" /> : <Moon className="w-6 h-6 text-blue-200" />;
+    }
     if (c.includes('lluvia') || c.includes('chubasco')) return <CloudRain className="w-6 h-6 text-blue-400" />;
     if (c.includes('nub') || c.includes('cubierto')) return <Cloud className="w-6 h-6 text-gray-400" />;
-    return <SunMedium className="w-6 h-6 text-yellow-200" />;
+    return isDay ? <SunMedium className="w-6 h-6 text-yellow-200" /> : <Moon className="w-6 h-6 text-blue-100" />;
   };
 
   if (loading && !weather) {
@@ -195,7 +230,7 @@ export default function App() {
                     {weather.current.condition}
                   </h2>
                   <div className="mt-8 bg-black/20 backdrop-blur-md px-6 py-3 rounded-full border border-white/10 flex items-center gap-4">
-                    <Sun className="w-5 h-5 text-yellow-400" />
+                    {getWeatherIcon(weather.current.condition, isDaytime(undefined, weather.current.sunrise, weather.current.sunset))}
                     <span className="text-sm font-medium">
                       MÁX: {weather.current.high}°C MÍN: {weather.current.low}°C
                     </span>
@@ -221,7 +256,7 @@ export default function App() {
                       <span className="text-xs font-bold uppercase tracking-tighter opacity-60">
                         {i === 0 ? 'Ahora' : hour.time}
                       </span>
-                      {getWeatherIcon(hour.condition)}
+                      {getWeatherIcon(hour.condition, isDaytime(hour.time, weather.current.sunrise, weather.current.sunset))}
                       <span className="text-lg font-semibold">{hour.temp}°C</span>
                     </div>
                   ))}
